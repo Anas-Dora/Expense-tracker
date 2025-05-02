@@ -88,7 +88,11 @@ class AusgabenListeState extends State<AusgabenListe> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Neue Ausgabe'),
+              backgroundColor: Color(0xff272a2f),
+              title: Text(
+                'Neue Ausgabe',
+                style: TextStyle(color: Color(0xffe1e2e8)),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -97,40 +101,96 @@ class AusgabenListeState extends State<AusgabenListe> {
                     keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: InputDecoration(labelText: 'Betrag'),
+                    style: TextStyle(color: Color(0xffe1e2e8)),
+                    cursorColor: Color(0xffa0cafd),
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xffa0cafd)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xffC3C7CF)),
+                      ),
+                      labelText: 'Betrag',
+                      labelStyle: TextStyle(color: Color(0xffe1e2e8)),
+                      focusColor: Color(0xffa0cafd),
+                    ),
                   ),
                   SizedBox(height: 10),
                   TextField(
                     controller: beschreibungController,
-                    decoration: InputDecoration(labelText: 'Beschreibung'),
+                    style: TextStyle(color: Color(0xffe1e2e8)),
+                    cursorColor: Color(0xffa0cafd),
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xffa0cafd)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xffC3C7CF)),
+                      ),
+                      labelText: 'Beschreibung',
+                      labelStyle: TextStyle(color: Color(0xffe1e2e8)),
+                      focusColor: Color(0xffa0cafd),
+                    ),
                   ),
                   SizedBox(height: 10),
-                  DropdownButton<String>(
-                    value: gewaehlteKategorie,
-                    isExpanded: true,
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          gewaehlteKategorie = value;
-                        });
-                      }
-                    },
-                    items:
-                        kategorien
-                            .where((k) => k != 'Alle')
-                            .map(
-                              (k) => DropdownMenuItem(value: k, child: Text(k)),
-                            )
-                            .toList(),
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      inputDecorationTheme: InputDecorationTheme(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xffe1e2e8)),
+                        ),
+                      ),
+                    ),
+                    child: DropdownMenu<String>(
+                      width: 300,
+                      trailingIcon: Icon(
+                        Icons.arrow_drop_down,
+                        color: Color(0xffe1e2e8),
+                      ),
+                      textStyle: TextStyle(color: Color(0xffe1e2e8)),
+                      menuStyle: MenuStyle(
+                        backgroundColor: WidgetStatePropertyAll<Color>(
+                          Color(0xff272a2f),
+                        ),
+                      ),
+                      initialSelection: gewaehlteKategorie,
+
+                      onSelected: (value) {
+                        if (value != null) {
+                          setState(() {
+                            gewaehlteKategorie = value;
+                          });
+                        }
+                      },
+                      dropdownMenuEntries:
+                          kategorien
+                              .where((k) => k != 'Alle')
+                              .map(
+                                (k) => DropdownMenuEntry(
+                                  value: k,
+                                  label: k,
+                                  style: ButtonStyle(
+                                    foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                          Color(0xffe1e2e8),
+                                        ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                    ),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Abbrechen'),
+                  child: Text(
+                    'Abbrechen',
+                    style: TextStyle(color: Color(0xffa0cafd)),
+                  ),
                 ),
-                ElevatedButton(
+                FilledButton(
                   onPressed: () {
                     final betrag = double.tryParse(betragController.text);
                     final beschreibung = beschreibungController.text;
@@ -148,6 +208,14 @@ class AusgabenListeState extends State<AusgabenListe> {
                       Navigator.pop(context, neueAusgabe);
                     }
                   },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll<Color>(
+                      Color(0xffa0cafd),
+                    ),
+                    foregroundColor: WidgetStatePropertyAll<Color>(
+                      Color(0xff003258),
+                    ),
+                  ),
                   child: Text('Hinzufügen'),
                 ),
               ],
@@ -178,20 +246,38 @@ class AusgabenListeState extends State<AusgabenListe> {
 
   void _startBetragEingeben() {
     final controller = TextEditingController();
-
+    final brightness = Theme.of(context).brightness;
+    final backgroundColor =
+        brightness == Brightness.light
+            ? const Color(0xFF272A2F)
+            : const Color(0xFFE6E8EE);
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('Betrag festlegen'),
+            title: Text(
+              'Betrag festlegen',
+              style: TextStyle(color: Color(0xFFE1E2E8)),
+            ),
+            backgroundColor: backgroundColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: controller,
+                  cursorColor: Color(0xffa0cafd),
+                  style: TextStyle(color: Color(0xFFE1E2E8)),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xffa0cafd)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xffC3C7CF)),
+                    ),
+                    focusColor: Color(0xffa0cafd),
                     hintText: 'Betrag',
+                    hintStyle: TextStyle(color: Color(0xffC3C7CF)),
                     contentPadding: EdgeInsets.symmetric(
                       vertical: 12,
                       horizontal: 16,
@@ -204,9 +290,12 @@ class AusgabenListeState extends State<AusgabenListe> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Abbrechen'),
+                child: Text(
+                  'Abbrechen',
+                  style: TextStyle(color: Color(0xffa0cafd)),
+                ),
               ),
-              ElevatedButton(
+              FilledButton(
                 onPressed: () {
                   final value = double.tryParse(controller.text);
 
@@ -214,7 +303,7 @@ class AusgabenListeState extends State<AusgabenListe> {
                     final betrag = Betrag(value);
                     final box = Hive.box<Betrag>('betraege');
 
-                    box.add(betrag); // 💾 speichert den Betrag in Hive
+                    box.add(betrag);
 
                     setState(() {
                       startBetrag = value;
@@ -222,7 +311,6 @@ class AusgabenListeState extends State<AusgabenListe> {
 
                     Navigator.pop(context);
                   } else {
-                    // Optional: Zeige einen Fehlerdialog oder SnackBar
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Bitte eine gültige Zahl eingeben.'),
@@ -230,7 +318,106 @@ class AusgabenListeState extends State<AusgabenListe> {
                     );
                   }
                 },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll<Color>(
+                    Color(0xffa0cafd),
+                  ),
+                  foregroundColor: WidgetStatePropertyAll<Color>(
+                    Color(0xff003258),
+                  ),
+                ),
                 child: Text('Speichern'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget buildPopupMenu() {
+    const Color textColor = Color(0xffe1e2e8);
+    const Color backgroundColor = Color(0xff272a2f);
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(popupMenuTheme: PopupMenuThemeData(color: backgroundColor)),
+      child: PopupMenuButton<String>(
+        icon: const Icon(
+          Icons.more_vert,
+          color: Color(0xffD1E4FF),
+        ), // Icon des Buttons
+        onSelected: (value) {
+          if (value == 'add') {
+            _startBetragEingeben();
+          } else if (value == 'delete') {
+            showDeleteConfirmationDialog(context);
+          }
+        },
+        itemBuilder:
+            (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'add',
+                child: Row(
+                  children: const [
+                    Icon(Icons.add, color: textColor),
+                    SizedBox(width: 8),
+                    Text(
+                      'Geld hinzufügen',
+                      style: const TextStyle(color: textColor),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: const [
+                    Icon(Icons.delete, color: textColor),
+                    SizedBox(width: 8),
+                    Text(
+                      'Alles löschen',
+                      style: const TextStyle(color: textColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+      ),
+    );
+  }
+
+  void showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xff272a2f),
+            title: const Text(
+              'Bestätigen',
+              style: TextStyle(color: Color(0xffe1e2e8)),
+            ),
+            content: const Text(
+              'Möchtest du wirklich alle Ausgaben löschen?',
+              style: TextStyle(color: Color(0xffe1e2e8)),
+            ),
+            actions: [
+              TextButton(
+                child: const Text(
+                  'Abbrechen',
+                  style: TextStyle(color: Color(0xffe1e2e8)),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text(
+                  'Löschen',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // TODO: Alle daten Löschen
+                },
               ),
             ],
           ),
@@ -258,21 +445,38 @@ class AusgabenListeState extends State<AusgabenListe> {
       gruppierteAusgaben[datum]!.add(ausgabe);
     }
 
-    // Optional: sortieren, neueste Tage zuerst
     final sortedDates =
         gruppierteAusgaben.keys.toList()..sort((a, b) => b.compareTo(a));
+    final ausgegebeneBetrag = startBetrag - verbleibenderBetrag;
 
+    final brightness = Theme.of(context).brightness;
+    final backgroundColor =
+        brightness == Brightness.light
+            ? const Color(0xFF272A2F)
+            : const Color(0xFFE6E8EE);
     return Scaffold(
+      backgroundColor: Color(0xff191C20),
       appBar: AppBar(
         title: Text('Ausgaben Tracker'),
+        backgroundColor: backgroundColor,
+        foregroundColor: Color(0xFFE1E2E8),
         actions: [
           DropdownButton<String>(
             value: filterKategorie,
             onChanged: (value) => setState(() => filterKategorie = value!),
             items:
                 kategorien
-                    .map((k) => DropdownMenuItem(value: k, child: Text(k)))
+                    .map(
+                      (k) => DropdownMenuItem(
+                        value: k,
+                        child: Text(
+                          k,
+                          style: TextStyle(color: Color(0xFFE1E2E8)),
+                        ),
+                      ),
+                    )
                     .toList(),
+            dropdownColor: Color(0xff272A2F),
           ),
         ],
       ),
@@ -283,37 +487,140 @@ class AusgabenListeState extends State<AusgabenListe> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onLongPress: () {
-                    _startBetragEingeben();
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100, // heller Grünton
-                      borderRadius: BorderRadius.circular(
-                        12,
-                      ), // abgerundete Ecken
-                    ),
-
-                    child: Text(
-                      '${verbleibenderBetrag.toStringAsFixed(2)} €',
-                      style: TextStyle(
-                        color:
-                            Colors
-                                .green
-                                .shade800, // dunkleres Grün für den Text
-
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
+                Container(
+                  width: 355,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Color(0xff194975),
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Kontostand:",
+                              style: TextStyle(
+                                color: Color(0xffD1E4FF),
+                                fontSize: 14,
+                              ),
+                            ),
+                            buildPopupMenu(),
+                          ],
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 8),
+                      Text(
+                        '${verbleibenderBetrag.toStringAsFixed(2)} €',
+                        style: TextStyle(
+                          color: Color(0xffD1E4FF),
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            width: 150,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Color(0xff194975),
+                              border: Border.all(color: Color(0xffD1E4FF)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        9,
+                                        4,
+                                        0,
+                                        4,
+                                      ),
+                                      child: Text(
+                                        "Budget:",
+                                        style: TextStyle(
+                                          color: Color(0xffD1E4FF),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Center(
+                                  child: Text(
+                                    '${startBetrag.toStringAsFixed(2)} €',
+                                    style: TextStyle(
+                                      color: Color(0xffD1E4FF),
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 150,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Color(0xff194975),
+                              border: Border.all(color: Color(0xffD1E4FF)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        9,
+                                        4,
+                                        0,
+                                        4,
+                                      ),
+                                      child: Text(
+                                        "Ausgaben:",
+                                        style: TextStyle(
+                                          color: Color(0xffD1E4FF),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Center(
+                                  child: Text(
+                                    '${ausgegebeneBetrag.toStringAsFixed(2)} €',
+                                    style: TextStyle(
+                                      color: Color(0xffD1E4FF),
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 10),
           Expanded(
             child: ListView.builder(
               itemCount: gruppierteAusgaben.length,
@@ -327,15 +634,8 @@ class AusgabenListeState extends State<AusgabenListe> {
                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    // Dynamisch je nach Helligkeit des Themas
-                    color:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Colors
-                                .grey
-                                .shade800 // Dunkler Hintergrund im Dark Mode
-                            : Colors
-                                .grey
-                                .shade100, // Heller Hintergrund im Light Mode
+                    color: Color(0xffA0CAFD),
+                    // Heller Hintergrund im Light Mode
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -344,25 +644,12 @@ class AusgabenListeState extends State<AusgabenListe> {
                       Text(
                         DateFormat('dd.MM.yyyy').format(date),
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          // Dynamische Textfarbe je nach Modus
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors
-                                      .white // Textfarbe im Dark Mode
-                                  : Colors
-                                      .blueAccent, // Textfarbe im Light Mode
+                          color: Color(0xff003258),
                         ),
                       ),
-                      Divider(
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors
-                                    .white70 // Helle Trennlinie im Dark Mode
-                                : Colors
-                                    .black45, // Dunklere Trennlinie im Light Mode
-                      ),
+                      Divider(color: Color(0xff2E3135)),
                       ...ausgabenAnDemTag.map((ausgabe) {
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
@@ -375,26 +662,20 @@ class AusgabenListeState extends State<AusgabenListe> {
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(ausgabe.beschreibung),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                              Text(
+                                ausgabe.beschreibung,
+                                style: TextStyle(
+                                  color: Color(0xff003258),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      Colors
-                                          .red
-                                          .shade100, // Rote Hintergrundfarbe für Betrag
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '- ${ausgabe.betrag.toStringAsFixed(2)} €',
-                                  style: TextStyle(
-                                    color: Colors.red.shade800,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
+                              ),
+                              Text(
+                                '- ${ausgabe.betrag.toStringAsFixed(2)} €',
+                                style: TextStyle(
+                                  color: Color(0xffBA1A1A),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
@@ -402,15 +683,8 @@ class AusgabenListeState extends State<AusgabenListe> {
                           subtitle: Text(
                             '${ausgabe.kategorie}',
                             style: TextStyle(
+                              color: Color(0xff003258),
                               fontSize: 16,
-                              // Dynamische Subtextfarbe je nach Modus
-                              color:
-                                  Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors
-                                          .white // Subtextfarbe im Dark Mode
-                                      : Colors
-                                          .black, // Subtextfarbe im Light Mode
                             ),
                           ),
                         );
@@ -424,9 +698,9 @@ class AusgabenListeState extends State<AusgabenListe> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue.shade800,
+        backgroundColor: Color(0xff194975),
         onPressed: _ausgabeHinzufuegen,
-        child: Icon(Icons.add, color: Colors.blue.shade100),
+        child: Icon(Icons.add, color: Color(0xffD1E4FF)),
       ),
     );
   }

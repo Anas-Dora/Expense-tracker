@@ -3,8 +3,6 @@
 import 'package:expenditure/ausgabe.dart';
 import 'package:expenditure/betrag.dart';
 import 'package:expenditure/HomePage.dart';
-import 'package:expenditure/Themes/Dark_Theme.dart';
-import 'package:expenditure/Themes/Light_Theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -27,25 +25,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // Anfangszustand für das Thema (Systemthema)
-  ThemeMode _themeMode = ThemeMode.system;
-
-  // Funktion zum Ändern des Themas
-  void _changeTheme(ThemeMode mode) {
-    setState(() {
-      _themeMode = mode;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ausgaben Tracker',
-      theme: blueLightTheme(),
-      darkTheme: blueDarkTheme(),
-      themeMode: _themeMode,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: Homepage(onThemeChanged: _changeTheme),
+      home: Homepage(),
     );
   }
 }
