@@ -5,6 +5,7 @@ import 'package:expenditure/betrag.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+//651,74
 
 class AusgabenListe extends StatefulWidget {
   const AusgabenListe({super.key});
@@ -244,92 +245,133 @@ class AusgabenListeState extends State<AusgabenListe> {
     }
   }
 
-  void _startBetragEingeben() {
+  void _startBetragEingeben(VoidCallback updateStateExtern) {
     final controller = TextEditingController();
     final brightness = Theme.of(context).brightness;
     final backgroundColor =
         brightness == Brightness.light
             ? const Color(0xFF272A2F)
             : const Color(0xFFE6E8EE);
+
+    bool _addiere = false;
+
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(
-              'Betrag festlegen',
-              style: TextStyle(color: Color(0xFFE1E2E8)),
-            ),
-            backgroundColor: backgroundColor,
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: controller,
-                  cursorColor: Color(0xffa0cafd),
+      builder: (context) {
+        return StatefulBuilder(
+          builder:
+              (context, setState) => AlertDialog(
+                title: Text(
+                  'Betrag festlegen',
                   style: TextStyle(color: Color(0xFFE1E2E8)),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xffa0cafd)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xffC3C7CF)),
-                    ),
-                    focusColor: Color(0xffa0cafd),
-                    hintText: 'Betrag',
-                    hintStyle: TextStyle(color: Color(0xffC3C7CF)),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                  ),
-                  textAlign: TextAlign.center,
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Abbrechen',
-                  style: TextStyle(color: Color(0xffa0cafd)),
-                ),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final value = double.tryParse(controller.text);
-
-                  if (value != null && value >= 0) {
-                    final betrag = Betrag(value);
-                    final box = Hive.box<Betrag>('betraege');
-
-                    box.add(betrag);
-
-                    setState(() {
-                      startBetrag = value;
-                    });
-
-                    Navigator.pop(context);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Bitte eine gültige Zahl eingeben.'),
+                backgroundColor: backgroundColor,
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: controller,
+                      cursorColor: Color(0xffa0cafd),
+                      style: TextStyle(color: Color(0xFFE1E2E8)),
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                    );
-                  }
-                },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll<Color>(
-                    Color(0xffa0cafd),
-                  ),
-                  foregroundColor: WidgetStatePropertyAll<Color>(
-                    Color(0xff003258),
-                  ),
+                      decoration: InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xffa0cafd)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xffC3C7CF)),
+                        ),
+                        hintText: 'Betrag',
+                        hintStyle: TextStyle(color: Color(0xffC3C7CF)),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Zum bestehenden Betrag addieren',
+                          style: TextStyle(color: Color(0xFFE1E2E8)),
+                        ),
+                        Switch(
+                          thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                            Set<WidgetState> states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Icon(
+                                Icons.add,
+                                color: Color(0xffa0cafd),
+                              );
+                            }
+                            return null; // All other states will use the default thumbIcon.
+                          }),
+                          value: _addiere,
+                          onChanged: (value) {
+                            setState(() {
+                              _addiere = value;
+                            });
+                          },
+                          activeColor: Color(0xff003258),
+                          activeTrackColor: Color(0xffa0cafd),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: Text('Speichern'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Abbrechen',
+                      style: TextStyle(color: Color(0xffa0cafd)),
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      final value = double.tryParse(controller.text);
+
+                      if (value != null && value >= 0) {
+                        final box = Hive.box<Betrag>('betraege');
+
+                        double neuerBetrag =
+                            _addiere ? startBetrag + value : value;
+
+                        final betrag = Betrag(neuerBetrag);
+                        box.add(betrag);
+
+                        startBetrag = neuerBetrag;
+                        updateStateExtern();
+
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Bitte eine gültige Zahl eingeben.'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll<Color>(
+                        Color(0xffa0cafd),
+                      ),
+                      foregroundColor: WidgetStatePropertyAll<Color>(
+                        Color(0xff003258),
+                      ),
+                    ),
+                    child: Text('Speichern'),
+                  ),
+                ],
               ),
-            ],
-          ),
+        );
+      },
     );
   }
 
@@ -347,7 +389,7 @@ class AusgabenListeState extends State<AusgabenListe> {
         ), // Icon des Buttons
         onSelected: (value) {
           if (value == 'add') {
-            _startBetragEingeben();
+            _startBetragEingeben(() => setState(() {}));
           } else if (value == 'delete') {
             showDeleteConfirmationDialog(context);
           }
@@ -603,7 +645,7 @@ class AusgabenListeState extends State<AusgabenListe> {
                                 ),
                                 Center(
                                   child: Text(
-                                    '${ausgegebeneBetrag.toStringAsFixed(2)} €',
+                                    '- ${ausgegebeneBetrag.toStringAsFixed(2)} €',
                                     style: TextStyle(
                                       color: Color(0xffD1E4FF),
                                       fontSize: 24,

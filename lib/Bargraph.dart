@@ -2,6 +2,7 @@
 
 import 'package:expenditure/AusgabenListe.dart';
 import 'package:expenditure/ausgabe.dart';
+import 'package:expenditure/widgets/time_range_selector.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,9 +17,13 @@ class BarGraph extends StatefulWidget {
 }
 
 class _BarGraphState extends State<BarGraph> {
-  String _zeitraum = 'Tag';
+  String _zeitraum = 'Heute';
+  String text = 'Heute';
   List<String> ausgewaehlteKategorien = [];
   String filterKategorie = 'Alle';
+  final Color barBackgroundColor = Color(0xffD1E4FF);
+  final Color barColor = Color(0xff194975);
+  final Color touchedBarColor = Color(0xff003258);
 
   Map<String, Map<String, double>> _berechneSummen(List<Ausgabe> ausgaben) {
     DateTime heute = DateTime.now();
@@ -33,7 +38,7 @@ class _BarGraphState extends State<BarGraph> {
           }
         }).toList();
 
-    if (_zeitraum == 'Tag') {
+    if (_zeitraum == 'Heute') {
       DateTime heuteStart = DateTime(heute.year, heute.month, heute.day);
       DateTime heuteEnde = heuteStart.add(Duration(days: 1));
 
@@ -70,11 +75,12 @@ class _BarGraphState extends State<BarGraph> {
           }).toList();
 
       for (var a in wocheAusgaben) {
-        String tag = DateFormat('dd.MM.').format(a.datum);
-        if (!summen.containsKey(tag)) {
-          summen[tag] = {};
+        String Heute = DateFormat('dd.MM.').format(a.datum);
+        if (!summen.containsKey(Heute)) {
+          summen[Heute] = {};
         }
-        summen[tag]![a.kategorie] = (summen[tag]![a.kategorie] ?? 0) + a.betrag;
+        summen[Heute]![a.kategorie] =
+            (summen[Heute]![a.kategorie] ?? 0) + a.betrag;
       }
     } else if (_zeitraum == 'Monat') {
       // Ganze aktuelle Monat
@@ -112,11 +118,24 @@ class _BarGraphState extends State<BarGraph> {
               .toList();
 
       for (var a in monatAusgaben) {
-        int woche = ((a.datum.day - 1) / 7).floor() + 1;
+        final ersterMontag = startDatum.add(
+          Duration(days: 8 - startDatum.weekday % 7),
+        );
+        int woche;
+
+        if (a.datum.isBefore(ersterMontag)) {
+          woche = 1;
+        } else {
+          final tageSeitErstemSonntag = a.datum.difference(ersterMontag).inDays;
+          woche = (tageSeitErstemSonntag / 7).floor() + 2;
+        }
+
         String wocheLabel = 'Woche $woche';
+
         if (!summen.containsKey(wocheLabel)) {
           summen[wocheLabel] = {};
         }
+
         summen[wocheLabel]![a.kategorie] =
             (summen[wocheLabel]![a.kategorie] ?? 0) + a.betrag;
       }
@@ -133,7 +152,11 @@ class _BarGraphState extends State<BarGraph> {
           builder: (context, setStateDialog) {
             // wichtig: setStateDialog!
             return AlertDialog(
-              title: Text('Kategorien auswählen'),
+              backgroundColor: Color(0xff191c20),
+              title: Text(
+                'Kategorien auswählen',
+                style: TextStyle(color: Color(0xFFE1E2E8)),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   children:
@@ -143,18 +166,29 @@ class _BarGraphState extends State<BarGraph> {
                             final isSelected = ausgewaehlteKategorien.contains(
                               kategorie,
                             );
-                            return CheckboxListTile(
-                              title: Text(kategorie),
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                setStateDialog(() {
-                                  if (value == true) {
-                                    ausgewaehlteKategorien.add(kategorie);
-                                  } else {
-                                    ausgewaehlteKategorien.remove(kategorie);
-                                  }
-                                });
-                              },
+                            return Theme(
+                              data: ThemeData(
+                                unselectedWidgetColor: Colors.white,
+                              ),
+                              child: CheckboxListTile(
+                                activeColor: Color(0xffA0CAFD),
+                                checkColor: Color(0xff003258),
+
+                                title: Text(
+                                  kategorie,
+                                  style: TextStyle(color: Color(0xFFE1E2E8)),
+                                ),
+                                value: isSelected,
+                                onChanged: (bool? value) {
+                                  setStateDialog(() {
+                                    if (value == true) {
+                                      ausgewaehlteKategorien.add(kategorie);
+                                    } else {
+                                      ausgewaehlteKategorien.remove(kategorie);
+                                    }
+                                  });
+                                },
+                              ),
                             );
                           })
                           .toList(),
@@ -162,7 +196,10 @@ class _BarGraphState extends State<BarGraph> {
               ),
               actions: [
                 TextButton(
-                  child: Text('Fertig'),
+                  child: Text(
+                    'Fertig',
+                    style: TextStyle(color: Color(0xffa0cafd)),
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                     setState(() {
@@ -181,68 +218,98 @@ class _BarGraphState extends State<BarGraph> {
     );
   }
 
+  double berechneGesamtausgaben(
+    Map<String, Map<String, double>> daten,
+    String zeitraum,
+  ) {
+    if (zeitraum == 'Heute') {
+      final heute = DateFormat('dd.MM.').format(DateTime.now());
+
+      final heuteMap = daten["Heute"];
+
+      return heuteMap!.values.fold(0.0, (sum, val) => sum + val);
+    } else {
+      return daten.values.fold(0.0, (sum, catMap) {
+        return sum + catMap.values.fold(0.0, (s, v) => s + v);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final daten = _berechneSummen(widget.ausgaben);
+    final gesamtsumme = berechneGesamtausgaben(daten, _zeitraum);
+
+    if (_zeitraum == 'Woche') {
+      text = 'diese Woche';
+    } else if (_zeitraum == 'Monat') {
+      text = 'diese Monat';
+    } else {
+      text = 'Heute';
+    }
 
     return Scaffold(
+      backgroundColor: Color(0xff191C20),
       appBar: AppBar(
         title: Text("Statistiken"),
+        backgroundColor: Color(0xFF272A2F),
+        foregroundColor: Color(0xFFE1E2E8),
         actions: [
           if (_zeitraum == 'Woche' || _zeitraum == 'Monat')
             IconButton(
               onPressed: _openKategorieFilterDialog,
-              icon: Icon(Icons.filter_alt),
+              icon: Icon(Icons.filter_alt, color: Color(0xFFE1E2E8)),
             ),
         ],
       ),
-      body:
-          daten.isEmpty
-              ? Center(
-                child: Text("Keine Ausgaben verfügbar"),
-              ) // Zeige eine Nachricht, wenn keine Ausgaben vorhanden sind
-              : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 12,
-                    ),
-                    child: DropdownButton<String>(
-                      value: _zeitraum,
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _zeitraum = value;
-                          });
-                        }
-                      },
-                      items:
-                          ['Tag', 'Woche', 'Monat']
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                    ),
+
+      body: Column(
+        children: [
+          SizedBox(height: 15),
+          Container(
+            alignment: Alignment.center,
+            width: 350,
+            height: 110,
+            decoration: BoxDecoration(
+              color: Color(0xffA0CAFD),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Meine Ausgaben für ${text}",
+                  style: TextStyle(fontSize: 20, color: Color(0xff003258)),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "${gesamtsumme.toStringAsFixed(2)} €",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff003258),
                   ),
-                  SizedBox(height: 15),
-                  Text(
-                    "13314 €",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade800,
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: buildBarChart(daten),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 30),
+          TimeRangeSelector(
+            zeitraum: _zeitraum,
+            onChanged: (String neuerZeitraum) {
+              setState(() {
+                _zeitraum = neuerZeitraum;
+              });
+            },
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: buildBarChart(daten),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -274,14 +341,15 @@ class _BarGraphState extends State<BarGraph> {
     return BarChart(
       BarChartData(
         maxY: 500,
-        gridData: FlGridData(show: true),
+        gridData: FlGridData(show: false),
+        borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
           topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               reservedSize: 45,
-              showTitles: true,
+              showTitles: false,
               interval: 100,
               getTitlesWidget:
                   (value, meta) => Text(
@@ -304,7 +372,10 @@ class _BarGraphState extends State<BarGraph> {
 
                 return Text(
                   labels[index],
-                  style: const TextStyle(fontSize: 15, color: Colors.red),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xffA0CAFD),
+                  ),
                 );
               },
             ),
@@ -313,8 +384,9 @@ class _BarGraphState extends State<BarGraph> {
         barGroups: List.generate(labels.length, (index) {
           final catMap = daten[labels[index]]!;
 
-          if (_zeitraum == 'Tag') {
+          if (_zeitraum == 'Heute') {
             return BarChartGroupData(
+              barsSpace: 50,
               x: index,
               barRods:
                   kategorien.map((kategorie) {
@@ -323,10 +395,14 @@ class _BarGraphState extends State<BarGraph> {
                       toY: value,
                       width: 20,
                       color: foregroundKategorie[kategorie] ?? Colors.red,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(20),
+                      backDrawRodData: BackgroundBarChartRodData(
+                        show: true,
+                        toY: 400,
+                        color: Color(0xffD1E4FF),
+                      ),
                     );
                   }).toList(),
-              barsSpace: 8,
             );
           } else if (_zeitraum == 'Woche' || _zeitraum == 'Monat') {
             final gesamtsumme = catMap.values.fold(
@@ -337,13 +413,17 @@ class _BarGraphState extends State<BarGraph> {
               x: index,
               barRods: [
                 BarChartRodData(
-                  toY: gesamtsumme.clamp(0, 500),
-                  width: 40,
-                  color: Colors.blue.shade800,
-                  borderRadius: BorderRadius.circular(4),
+                  toY: gesamtsumme.clamp(0, 400),
+                  width: 22,
+                  color: Color(0xff194975),
+                  borderRadius: BorderRadius.circular(20),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: 400,
+                    color: Color(0xffD1E4FF),
+                  ),
                 ),
               ],
-              barsSpace: 8,
             );
           }
 
@@ -354,20 +434,20 @@ class _BarGraphState extends State<BarGraph> {
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
             getTooltipColor: (group) {
-              if (_zeitraum == 'Tag') {
+              if (_zeitraum == 'Heute') {
                 String kategorie =
                     kategorien[group.x
                         .toInt()]; // Nutze die X-Position für die Kategorie
                 return backgroundkategorie[kategorie] ?? Colors.grey.shade100;
               } else if (_zeitraum == 'Woche' || _zeitraum == 'Monat') {
-                return Colors.blue.shade100;
+                return Color(0xffA0CAFD);
               }
               return Colors.grey.shade200; // fallback
             },
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               String kategorie;
               Color farbe;
-              if (_zeitraum == 'Tag') {
+              if (_zeitraum == 'Heute') {
                 if (rodIndex < kategorien.length) {
                   kategorie = kategorien[rodIndex];
                   farbe = foregroundKategorie[kategorie] ?? Colors.grey;
@@ -377,7 +457,7 @@ class _BarGraphState extends State<BarGraph> {
                 }
               } else {
                 kategorie = 'Ausgaben';
-                farbe = Colors.blue.shade800;
+                farbe = Color(0xff003258);
               }
 
               return BarTooltipItem(
