@@ -42,22 +42,41 @@ class _HomepageState extends State<Homepage> {
       _barGraph,
     ];
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Statistiken',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: Color(0xff1D2024),
-        selectedItemColor: Color(0xffD6E3F7),
-        unselectedItemColor: Color(0xffC3C7CF),
-        selectedIconTheme: IconThemeData(color: Color(0xffD6E3F7)),
-        unselectedIconTheme: IconThemeData(color: Color(0xffC3C7CF)),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>((
+            states,
+          ) {
+            if (states.contains(MaterialState.selected)) {
+              return const TextStyle(
+                color: Color(0xffC3C7CF),
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return const TextStyle(color: Color(0xffC3C7CF));
+          }),
+        ),
+        child: NavigationBar(
+          backgroundColor: const Color(0xff1D2024),
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          indicatorColor: Color(0XFF3b4858),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined, color: Color(0xffC3C7CF)),
+              selectedIcon: Icon(Icons.home, color: Color(0xffD6E3F7)),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.analytics_outlined, color: Color(0xffC3C7CF)),
+              selectedIcon: Icon(Icons.analytics, color: Color(0xffD6E3F7)),
+              label: 'Statistiken',
+            ),
+          ],
+        ),
       ),
+
       body: screens[_selectedIndex],
     );
   }

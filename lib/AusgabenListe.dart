@@ -504,6 +504,7 @@ class AusgabenListeState extends State<AusgabenListe> {
         foregroundColor: Color(0xFFE1E2E8),
         actions: [
           DropdownButton<String>(
+            icon: Icon(Icons.arrow_drop_down, color: Color(0xFFE1E2E8)),
             value: filterKategorie,
             onChanged: (value) => setState(() => filterKategorie = value!),
             items:

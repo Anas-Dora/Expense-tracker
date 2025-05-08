@@ -24,6 +24,7 @@ class _BarGraphState extends State<BarGraph> {
   final Color barBackgroundColor = Color(0xffD1E4FF);
   final Color barColor = Color(0xff194975);
   final Color touchedBarColor = Color(0xff003258);
+  bool isChecked = false;
 
   Map<String, Map<String, double>> _berechneSummen(List<Ausgabe> ausgaben) {
     DateTime heute = DateTime.now();
@@ -183,8 +184,10 @@ class _BarGraphState extends State<BarGraph> {
                                   setStateDialog(() {
                                     if (value == true) {
                                       ausgewaehlteKategorien.add(kategorie);
+                                      isChecked = true;
                                     } else {
                                       ausgewaehlteKategorien.remove(kategorie);
+                                      isChecked = false;
                                     }
                                   });
                                 },
@@ -258,7 +261,13 @@ class _BarGraphState extends State<BarGraph> {
           if (_zeitraum == 'Woche' || _zeitraum == 'Monat')
             IconButton(
               onPressed: _openKategorieFilterDialog,
-              icon: Icon(Icons.filter_alt, color: Color(0xFFE1E2E8)),
+              icon:
+                  isChecked
+                      ? Icon(Icons.filter_alt, color: Color(0xFFE1E2E8))
+                      : Icon(
+                        Icons.filter_alt_outlined,
+                        color: Color(0xFFE1E2E8),
+                      ),
             ),
         ],
       ),
