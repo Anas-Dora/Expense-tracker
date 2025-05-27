@@ -245,6 +245,18 @@ class AusgabenListeState extends State<AusgabenListe> {
     }
   }
 
+  void clearData() {
+    final betraegeBox = Hive.box<Betrag>('betraege');
+    final ausgabenBox = Hive.box<Ausgabe>('ausgaben');
+
+    setState(() {
+      ausgaben.clear();
+      betraegeBox.clear();
+      ausgabenBox.clear();
+      startBetrag = 0;
+    });
+  }
+
   void _startBetragEingeben(VoidCallback updateStateExtern) {
     final controller = TextEditingController();
     final brightness = Theme.of(context).brightness;
@@ -458,7 +470,7 @@ class AusgabenListeState extends State<AusgabenListe> {
                 ),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // TODO: Alle daten Löschen
+                  clearData();
                 },
               ),
             ],

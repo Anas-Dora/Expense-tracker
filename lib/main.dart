@@ -29,6 +29,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       themeMode: ThemeMode.system,
+      theme: ThemeData(
+        textSelectionTheme: TextSelectionThemeData(
+          selectionColor: Color(0xffa0cafd),
+          cursorColor: Color(0xffa0cafd),
+          selectionHandleColor: Color(0xffa0cafd),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       home: Homepage(),
     );
