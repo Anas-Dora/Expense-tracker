@@ -3,9 +3,9 @@
 import 'package:expenditure/ausgabe.dart';
 import 'package:expenditure/betrag.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-//651,74
 
 class AusgabenListe extends StatefulWidget {
   const AusgabenListe({super.key});
@@ -27,12 +27,6 @@ class AusgabenListeState extends State<AusgabenListe> {
   ];
 
   List<Ausgabe> get getAusgaben => ausgaben;
-
-  void clearAusgaben() {
-    setState(() {
-      ausgaben.clear(); // <-- Korrekt: direkte Liste leeren
-    });
-  }
 
   double startBetrag = 00.0;
 
@@ -82,6 +76,7 @@ class AusgabenListeState extends State<AusgabenListe> {
     final betragController = TextEditingController();
     final beschreibungController = TextEditingController();
     String gewaehlteKategorie = kategorien[1];
+    betragController.text = "0.00";
 
     final neueAusgabe = await showDialog<Ausgabe>(
       context: context,
@@ -99,12 +94,16 @@ class AusgabenListeState extends State<AusgabenListe> {
                 children: [
                   TextField(
                     controller: betragController,
-                    keyboardType: TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      EuroFormatter(),
+                    ],
                     style: TextStyle(color: Color(0xffe1e2e8)),
                     cursorColor: Color(0xffa0cafd),
                     decoration: InputDecoration(
+                      suffixText: '€ ',
+                      suffixStyle: TextStyle(color: Color(0xffe1e2e8)),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xffa0cafd)),
                       ),
@@ -757,6 +756,31 @@ class AusgabenListeState extends State<AusgabenListe> {
         onPressed: _ausgabeHinzufuegen,
         child: Icon(Icons.add, color: Color(0xffD1E4FF)),
       ),
+    );
+  }
+}
+
+class EuroFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (digits.isEmpty) {
+      return TextEditingValue(
+        text: "0.00",
+        selection: const TextSelection.collapsed(offset: 4),
+      );
+    }
+
+    int value = int.parse(digits);
+    String formatted = (value / 100).toStringAsFixed(2);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
