@@ -13,7 +13,7 @@ analyzer:
     sort_child_properties_last: ignore
     deprecated_member_use: ignore
     unused_local_variable: ignore
-#include: package:flutter_lints/flutter.yaml
+include: package:flutter_lints/flutter.yaml
 
 linter:
   # The lint rules applied to this project can be customized in the

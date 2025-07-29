@@ -1,8 +1,8 @@
 // ignore_for_file: use_key_in_widget_constructors, library_private_types_in_public_api
 
-import 'package:expenditure/ausgabe.dart';
-import 'package:expenditure/betrag.dart';
-import 'package:expenditure/HomePage.dart';
+import 'package:expenditure/data/ausgabe.dart';
+import 'package:expenditure/data/betrag.dart';
+import 'package:expenditure/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -15,6 +15,8 @@ void main() async {
 
   Hive.registerAdapter(AusgabeAdapter());
   await Hive.openBox<Ausgabe>('ausgaben');
+
+  await Future.delayed(Duration(seconds: 1));
 
   runApp(MyApp());
 }
@@ -37,7 +39,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: Homepage(),
+      home: HomeScreen(),
     );
   }
 }
