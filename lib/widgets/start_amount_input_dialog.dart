@@ -15,7 +15,14 @@ class StartAmountInputDialog extends StatefulWidget {
 
 class _StartAmountInputDialogState extends State<StartAmountInputDialog> {
   final _controller = TextEditingController();
-  var startBetrag = 00.0;
+  var currentAmount = 00.0;
+  bool idAdd = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = "0.00";
+  }
 
   @override
   void dispose() {
@@ -25,8 +32,6 @@ class _StartAmountInputDialogState extends State<StartAmountInputDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool addiere = false;
-    _controller.text = "0.00";
     return AlertDialog(
       backgroundColor: Color(0xFF272A2F),
       title: Text(
@@ -77,12 +82,12 @@ class _StartAmountInputDialogState extends State<StartAmountInputDialog> {
                   if (states.contains(WidgetState.selected)) {
                     return const Icon(Icons.add, color: Color(0xffa0cafd));
                   }
-                  return null; // All other states will use the default thumbIcon.
+                  return null;
                 }),
-                value: addiere,
+                value: idAdd,
                 onChanged: (value) {
                   setState(() {
-                    addiere = value;
+                    idAdd = value;
                   });
                 },
                 activeColor: Color(0xff003258),
@@ -106,13 +111,13 @@ class _StartAmountInputDialogState extends State<StartAmountInputDialog> {
 
             if (value != null && value >= 0) {
               final box = Hive.box<Betrag>('betraege');
+              final lastAmount = box.values.last;
+              currentAmount = lastAmount.geldMenge ?? 0.0;
+              double newAmount = idAdd ? currentAmount + value : value;
 
-              double neuerBetrag = addiere ? startBetrag + value : value;
+              final amount = Betrag(newAmount);
+              box.add(amount);
 
-              final betrag = Betrag(neuerBetrag);
-              box.add(betrag);
-
-              startBetrag = neuerBetrag;
               widget.updateStateExtern();
 
               Navigator.pop(context);

@@ -68,7 +68,7 @@ class _ExpensesChartScreenState extends State<ExpensesChartScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: BarChartWidget(daten: daten, zeitraum: _zeitraum),
+              child: BarChartWidget(data: daten, period: _zeitraum),
             ),
           ),
         ],

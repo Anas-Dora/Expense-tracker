@@ -2,21 +2,17 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class BarChartWidget extends StatelessWidget {
-  final Map<String, Map<String, double>> daten;
-  final String zeitraum;
+  final Map<String, Map<String, double>> data;
+  final String period;
 
-  const BarChartWidget({
-    super.key,
-    required this.daten,
-    required this.zeitraum,
-  });
+  const BarChartWidget({super.key, required this.data, required this.period});
 
   @override
   Widget build(BuildContext context) {
-    final labels = daten.keys.toList();
-    final kategorien = daten.values.expand((map) => map.keys).toSet().toList();
-    final farben = _getFarben();
-    final farbMap = _getFarbMap(kategorien, farben);
+    final labels = data.keys.toList();
+    final categories = data.values.expand((map) => map.keys).toSet().toList();
+    final colors = _getColors();
+    final colorsMap = _getColorsMap(categories, colors);
 
     return BarChart(
       BarChartData(
@@ -34,17 +30,17 @@ class BarChartWidget extends StatelessWidget {
           (index) => _buildBarGroup(
             index,
             labels[index],
-            daten[labels[index]]!,
-            kategorien,
-            farbMap,
+            data[labels[index]]!,
+            categories,
+            colorsMap,
           ),
         ),
-        barTouchData: _buildBarTouchData(kategorien, farbMap),
+        barTouchData: _buildBarTouchData(categories, colorsMap),
       ),
     );
   }
 
-  List<Color> _getFarben() => [
+  List<Color> _getColors() => [
     Colors.purple.shade800,
     Colors.yellow.shade800,
     Colors.orange.shade800,
@@ -53,10 +49,10 @@ class BarChartWidget extends StatelessWidget {
     Colors.pink.shade800,
   ];
 
-  Map<String, Color> _getFarbMap(List<String> kategorien, List<Color> farben) {
+  Map<String, Color> _getColorsMap(List<String> categories, List<Color> colors) {
     return {
-      for (int i = 0; i < kategorien.length; i++)
-        kategorien[i]: farben[i % farben.length],
+      for (int i = 0; i < categories.length; i++)
+        categories[i]: colors[i % colors.length],
     };
   }
 
@@ -65,9 +61,8 @@ class BarChartWidget extends StatelessWidget {
       showTitles: true,
       reservedSize: 45,
       interval: 100,
-      getTitlesWidget:
-          (value, _) =>
-              Text('${value.toInt()} €', style: const TextStyle(fontSize: 15)),
+      getTitlesWidget: (value, _) =>
+          Text('${value.toInt()} €', style: const TextStyle(fontSize: 15)),
     );
   }
 
@@ -90,36 +85,35 @@ class BarChartWidget extends StatelessWidget {
     int index,
     String label,
     Map<String, double> catMap,
-    List<String> kategorien,
-    Map<String, Color> farbMap,
+    List<String> categories,
+    Map<String, Color> colorMap,
   ) {
-    if (zeitraum == 'Heute') {
+    if (period == 'Heute') {
       return BarChartGroupData(
         x: index,
         barsSpace: 50,
-        barRods:
-            kategorien.map((kategorie) {
-              final value = catMap[kategorie] ?? 0;
-              return BarChartRodData(
-                toY: value,
-                width: 20,
-                color: farbMap[kategorie],
-                borderRadius: BorderRadius.circular(20),
-                backDrawRodData: BackgroundBarChartRodData(
-                  show: true,
-                  toY: 400,
-                  color: const Color(0xffD1E4FF),
-                ),
-              );
-            }).toList(),
+        barRods: categories.map((category) {
+          final value = catMap[category] ?? 0;
+          return BarChartRodData(
+            toY: value,
+            width: 20,
+            color: colorMap[category],
+            borderRadius: BorderRadius.circular(20),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: 400,
+              color: const Color(0xffD1E4FF),
+            ),
+          );
+        }).toList(),
       );
     } else {
-      final summe = catMap.values.fold(0.0, (sum, v) => sum + v);
+      final sum = catMap.values.fold(0.0, (sum, v) => sum + v);
       return BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
-            toY: summe.clamp(0, 400),
+            toY: sum.clamp(0, 400),
             width: 22,
             color: const Color(0xff194975),
             borderRadius: BorderRadius.circular(20),
@@ -135,23 +129,24 @@ class BarChartWidget extends StatelessWidget {
   }
 
   BarTouchData _buildBarTouchData(
-    List<String> kategorien,
-    Map<String, Color> farbMap,
+    List<String> categories,
+    Map<String, Color> colorMap,
   ) {
     return BarTouchData(
       enabled: true,
       touchTooltipData: BarTouchTooltipData(
-        getTooltipColor: (_) => const Color(0xffA0CAFD),
+        getTooltipColor: (_) =>
+            period == 'Heute' ? Colors.white : const Color(0xffA0CAFD),
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
-          final kategorie =
-              zeitraum == 'Heute' ? kategorien[rodIndex] : 'Ausgaben';
-          final farbe =
-              zeitraum == 'Heute'
-                  ? farbMap[kategorie] ?? Colors.grey
-                  : const Color(0xff003258);
+          final category = period == 'Heute'
+              ? categories[rodIndex]
+              : 'Ausgaben';
+          final color = period == 'Heute'
+              ? colorMap[category] ?? Colors.grey
+              : const Color(0xff003258);
           return BarTooltipItem(
-            '$kategorie\n${rod.toY.toStringAsFixed(2)} €',
-            TextStyle(color: farbe, fontWeight: FontWeight.bold, fontSize: 14),
+            '$category\n${rod.toY.toStringAsFixed(2)} €',
+            TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14),
           );
         },
       ),
