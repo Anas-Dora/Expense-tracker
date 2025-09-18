@@ -77,9 +77,8 @@ class ExpensesListScreenState extends State<ExpensesListScreen> {
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          builder:
-              (context, setState) =>
-                  StartAmountInputDialog(updateStateExtern: () => _ladeData()),
+          builder: (context, setState) =>
+              StartAmountInputDialog(updateStateExtern: () => _ladeData()),
         );
       },
     );
@@ -109,15 +108,14 @@ class ExpensesListScreenState extends State<ExpensesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gefilterteAusgaben =
-        filterKategorie == 'Alle'
-            ? ausgaben
-            : ausgaben.where((a) => a.kategorie == filterKategorie).toList();
+    final gefilterteAusgaben = filterKategorie == 'Alle'
+        ? ausgaben
+        : ausgaben.where((a) => a.kategorie == filterKategorie).toList();
 
     final gruppierteAusgaben = ExpenseGrouper.groupByDate(gefilterteAusgaben);
 
-    final sortedDates =
-        gruppierteAusgaben.keys.toList()..sort((a, b) => b.compareTo(a));
+    final sortedDates = gruppierteAusgaben.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
 
     final spentAmount = startingAmount - remainingAmount;
 
@@ -132,32 +130,30 @@ class ExpensesListScreenState extends State<ExpensesListScreen> {
             icon: Icon(Icons.arrow_drop_down, color: Color(0xFFE1E2E8)),
             value: filterKategorie,
             onChanged: (value) => setState(() => filterKategorie = value!),
-            items:
-                kategorien
-                    .map(
-                      (k) => DropdownMenuItem(
-                        value: k,
-                        child: Text(
-                          k,
-                          style: TextStyle(color: Color(0xFFE1E2E8)),
-                        ),
-                      ),
-                    )
-                    .toList(),
+            items: kategorien
+                .map(
+                  (k) => DropdownMenuItem(
+                    value: k,
+                    child: Text(k, style: TextStyle(color: Color(0xFFE1E2E8))),
+                  ),
+                )
+                .toList(),
             dropdownColor: Color(0xff272A2F),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: BudgetDisplay(
-              remainingAmount: remainingAmount,
-              startingAmount: startingAmount,
-              spentAmount: spentAmount,
-              startBetragEingeben: _startBetragEingeben,
-              showDeleteConfirmationDialog: showDeleteConfirmationDialog,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: BudgetDisplay(
+                remainingAmount: remainingAmount,
+                startingAmount: startingAmount,
+                spentAmount: spentAmount,
+                startBetragEingeben: _startBetragEingeben,
+                showDeleteConfirmationDialog: showDeleteConfirmationDialog,
+              ),
             ),
           ),
           ExpenseDisplay(
