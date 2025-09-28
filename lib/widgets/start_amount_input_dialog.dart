@@ -111,9 +111,10 @@ class _StartAmountInputDialogState extends State<StartAmountInputDialog> {
 
             if (value != null && value >= 0) {
               final box = Hive.box<Betrag>('betraege');
-              final lastAmount = box.values.last;
-              currentAmount = lastAmount.geldMenge ?? 0.0;
-              double newAmount = idAdd ? currentAmount + value : value;
+              final lastAmount = box.values.isNotEmpty
+                  ? box.values.last.geldMenge ?? 0.0
+                  : 0.0;
+              double newAmount = idAdd ? lastAmount + value : value;
 
               final amount = Betrag(newAmount);
               box.add(amount);
